@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+run.sh
+names.json
+config.json
+*.tmp

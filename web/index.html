@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#24124a">
+<title>Buzzer Party Admin</title>
+<style>
+  :root {
+    --bg: #1b0d3a; --bg2: #2a1458; --panel: #2c1d5c; --panel2: #382673; --line: #4c3a8f;
+    --text: #fff; --dim: #b4a8e0; --blue: #2d73ff; --orange: #ff8c1e; --green: #28c850;
+    --yellow: #ffd219; --red: #e62832; --radius: 16px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text);
+    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(1200px 600px at 10% -10%, #4b1d7a 0, transparent 60%),
+                radial-gradient(900px 500px at 110% 10%, #1d3b8a 0, transparent 55%),
+                linear-gradient(var(--bg2), var(--bg));
+    background-attachment: fixed;
+  }
+  header {
+    position: sticky; top: 0; z-index: 5; padding: 14px 16px 0;
+    background: linear-gradient(var(--bg2) 70%, transparent);
+  }
+  .brand { font-weight: 900; font-size: 26px; letter-spacing: .5px; margin: 0 0 10px; }
+  .brand .a { color: var(--yellow); } .brand .b { color: var(--red); }
+  .brand small { font-size: 13px; font-weight: 600; color: var(--dim); margin-left: 6px; letter-spacing: 0; }
+  .tabs { display: flex; gap: 8px; }
+  .tab {
+    flex: 1; padding: 11px; border: 0; border-radius: 12px 12px 0 0; cursor: pointer;
+    background: var(--panel); color: var(--dim); font: inherit; font-weight: 700;
+  }
+  .tab[aria-selected="true"] { background: var(--panel2); color: var(--text); }
+  main { max-width: 760px; margin: 0 auto; padding: 0 16px 120px; }
+  .sheet { background: var(--panel2); border-radius: 0 0 var(--radius) var(--radius); padding: 16px; }
+  header .tabs, main { max-width: 760px; margin-left: auto; margin-right: auto; }
+  h2 { font-size: 20px; margin: 4px 0 12px; }
+  p.hint { color: var(--dim); margin: 0 0 14px; font-size: 14px; }
+  .row {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px; margin-bottom: 8px;
+    background: var(--panel); border: 2px solid transparent; border-radius: 12px; transition: border-color .2s, background .2s;
+  }
+  .row.flash { border-color: var(--yellow); background: #4a3a1a; }
+  .slot-label { width: 128px; flex: none; font-size: 13px; font-weight: 700; color: var(--dim); letter-spacing: .3px; }
+  .slot-label .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--red); margin-right: 6px; vertical-align: 0; }
+  .slot-label .dot.pad { background: var(--blue); } .slot-label .dot.keys { background: var(--dim); } .slot-label .dot.saved { background: var(--line); }
+  input[type=text], textarea {
+    width: 100%; min-width: 0; padding: 11px 12px; border-radius: 10px; border: 2px solid var(--line);
+    background: #160b33; color: var(--text); font: inherit; outline: none;
+  }
+  input[type=text]:focus, textarea:focus { border-color: var(--yellow); }
+  textarea { resize: vertical; min-height: 64px; }
+  .row input[type=text], .ans input[type=text] { flex: 1; width: auto; }
+  .saved { color: var(--green); font-size: 13px; font-weight: 700; width: 44px; flex: none; text-align: right; opacity: 0; transition: opacity .3s; }
+  .saved.on { opacity: 1; }
+  .badge { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 99px; background: var(--green); color: #062; }
+  .badge.joined { background: var(--yellow); color: #432; }
+  .btn {
+    border: 0; border-radius: 12px; padding: 12px 16px; font: inherit; font-weight: 800; cursor: pointer;
+    background: var(--panel); color: var(--text); border: 2px solid var(--line);
+  }
+  .btn.primary { background: var(--green); border-color: var(--green); color: #052a10; }
+  .btn.yellow { background: var(--yellow); border-color: var(--yellow); color: #3a2a00; }
+  .btn.danger { background: transparent; border-color: var(--red); color: #ff8a8f; }
+  .btn.small { padding: 7px 11px; font-size: 14px; border-radius: 10px; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .quiz {
+    display: block; width: 100%; text-align: left; cursor: pointer; color: inherit; font: inherit;
+    background: var(--panel); border: 2px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 10px;
+  }
+  .quiz:hover { border-color: var(--yellow); }
+  .quiz .t { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .quiz .n { font-weight: 800; font-size: 18px; color: var(--yellow); }
+  .quiz .c { color: var(--dim); font-size: 14px; white-space: nowrap; }
+  .quiz .d { color: var(--dim); font-size: 14px; margin-top: 4px; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 13px; font-weight: 700; color: var(--dim); margin-bottom: 5px; }
+  .toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+  .toggle input { width: 22px; height: 22px; accent-color: var(--green); }
+  .q {
+    background: var(--panel); border-radius: 14px; padding: 12px; margin-bottom: 12px; border: 2px solid var(--line);
+  }
+  .q.invalid { border-color: var(--red); }
+  .q-head { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .q-num { font-weight: 900; color: var(--yellow); width: 34px; flex: none; }
+  .q-head input { flex: 1; }
+  .ans { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+  .ans .bz { width: 26px; height: 26px; border-radius: 50%; flex: none; box-shadow: inset -3px -4px 0 rgba(0,0,0,.25); }
+  .ans.right input { border-color: var(--green); }
+  .ans .tag { font-size: 11px; font-weight: 800; width: 52px; flex: none; color: var(--dim); }
+  .ans.right .tag { color: var(--green); }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 14px; }
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: rgba(27,13,58,.94); backdrop-filter: blur(6px); border-top: 1px solid var(--line);
+  }
+  .bar-inner { max-width: 760px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
+  .bar .msg { flex: 1; font-size: 14px; color: var(--dim); }
+  .bar .msg.err { color: #ff8a8f; } .bar .msg.ok { color: var(--green); }
+  .empty { text-align: center; color: var(--dim); padding: 30px 10px; }
+  .back { background: none; border: 0; color: var(--dim); font: inherit; font-weight: 700; cursor: pointer; padding: 4px 0; margin-bottom: 8px; }
+  details.bulk { background: var(--panel); border-radius: 14px; padding: 12px; margin-bottom: 14px; }
+  details.bulk summary { cursor: pointer; font-weight: 800; }
+  details.bulk pre { white-space: pre-wrap; color: var(--dim); font-size: 13px; margin: 8px 0; }
+  .offline { background: var(--red); color: #fff; text-align: center; font-weight: 700; padding: 8px; display: none; }
+  .offline.on { display: block; }
+  @media (max-width: 480px) { .slot-label { width: 92px; font-size: 12px; } .ans .tag { display: none; } }
+</style>
+</head>
+<body>
+<div class="offline" id="offline">Can't reach the game - is Admin mode still open?</div>
+<header>
+  <h1 class="brand"><span class="a">BUZZER</span> <span class="b">PARTY</span><small>admin</small></h1>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-players" aria-selected="true">Players</button>
+    <button class="tab" role="tab" id="tab-quizzes" aria-selected="false">Quizzes</button>
+  </div>
+</header>
+<main>
+  <section class="sheet" id="view-players">
+    <h2>Player names</h2>
+    <p class="hint">Names are remembered for each buzzer, so whoever has Buzzer 2 is named automatically when they join. Press a button on a buzzer and its row lights up here.</p>
+    <div id="slots"></div>
+  </section>
+
+  <section class="sheet" id="view-quizzes" hidden>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <h2 style="margin:0">Quizzes</h2>
+      <button class="btn yellow small" id="new-quiz">+ New quiz</button>
+    </div>
+    <p class="hint" style="margin-top:8px">Tap a quiz to edit it. Changes show up in the game straight away.</p>
+    <div id="quizzes"></div>
+  </section>
+
+  <section class="sheet" id="view-editor" hidden>
+    <button class="back" id="back">&larr; All quizzes</button>
+    <div class="field"><label for="e-name">Quiz name</label><input type="text" id="e-name" maxlength="60" placeholder="e.g. Family Trivia"></div>
+    <div class="field"><label for="e-desc">Description</label><input type="text" id="e-desc" maxlength="200" placeholder="Shown on the quiz picker"></div>
+    <div class="field"><label class="toggle"><input type="checkbox" id="e-kids"> Kids mode <span class="hint" style="margin:0">(longer timer, nobody loses points)</span></label></div>
+
+    <details class="bulk">
+      <summary>Paste lots of questions at once</summary>
+      <pre>One question per line, separated by | with the right answer first:
+Question | Right answer | Wrong | Wrong | Wrong
+Category | Question | Right answer | Wrong | Wrong | Wrong</pre>
+      <textarea id="bulk" rows="5" placeholder="What is the dog called? | Rex | Max | Bella | Luna"></textarea>
+      <div class="toolbar"><button class="btn small" id="bulk-add">Add these questions</button></div>
+    </details>
+
+    <h2 id="q-count">Questions</h2>
+    <div id="questions"></div>
+    <div class="toolbar">
+      <button class="btn" id="add-q">+ Add question</button>
+    </div>
+    <div class="toolbar" style="margin-top:30px">
+      <button class="btn danger small" id="delete-quiz">Delete this quiz</button>
+    </div>
+  </section>
+</main>
+
+<div class="bar" id="savebar" hidden>
+  <div class="bar-inner">
+    <div class="msg" id="msg">The first answer is always the right one - the game shuffles them.</div>
+    <button class="btn primary" id="save">Save quiz</button>
+  </div>
+</div>
+
+<template id="q-tpl">
+  <div class="q">
+    <div class="q-head">
+      <span class="q-num"></span>
+      <input type="text" class="cat" maxlength="30" placeholder="Category (optional)">
+      <button class="btn small del" title="Delete question" aria-label="Delete question">&times;</button>
+    </div>
+    <textarea class="qt" maxlength="200" rows="2" placeholder="Question"></textarea>
+  </div>
+</template>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const COLOURS = ["#2d73ff", "#ff8c1e", "#28c850", "#ffd219"];
+let editing = null;   // {file, ...}
+let dirty = false;
+let slotTimer = null;
+
+async function api(path, body) {
+  const opts = body === undefined ? {} : {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)};
+  let res;
+  try { res = await fetch(path, opts); } catch (e) { $("#offline").classList.add("on"); throw e; }
+  $("#offline").classList.remove("on");
+  const data = await res.json().catch(() => ({error: "bad response"}));
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v; else if (k === "text") e.textContent = v; else e.setAttribute(k, v);
+  }
+  for (const k of kids) e.append(k);
+  return e;
+}
+
+// ---------------------------------------------------------------- tabs
+function show(view) {
+  for (const v of ["players", "quizzes", "editor"]) $("#view-" + v).hidden = v !== view;
+  $("#tab-players").setAttribute("aria-selected", view === "players");
+  $("#tab-quizzes").setAttribute("aria-selected", view !== "players");
+  $("#savebar").hidden = view !== "editor";
+  window.scrollTo(0, 0);
+}
+function confirmLeave() { return !dirty || confirm("You have unsaved changes. Leave without saving?"); }
+$("#tab-players").onclick = () => { if (confirmLeave()) { dirty = false; show("players"); } };
+$("#tab-quizzes").onclick = () => { if (confirmLeave()) { dirty = false; show("quizzes"); refresh(); } };
+$("#back").onclick = () => { if (confirmLeave()) { dirty = false; show("quizzes"); refresh(); } };
+window.addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+// ---------------------------------------------------------------- players + quiz list
+const slotRows = {};
+function renderSlots(slots) {
+  const box = $("#slots");
+  const labels = new Set(slots.map(s => s.label));
+  for (const [label, row] of Object.entries(slotRows)) if (!labels.has(label)) { row.remove(); delete slotRows[label]; }
+  slots.forEach((s, i) => {
+    let row = slotRows[s.label];
+    if (!row) {
+      const input = el("input", {type: "text", maxlength: "12", placeholder: "Name", autocomplete: "off"});
+      const saved = el("span", {class: "saved", text: "saved"});
+      const label = el("span", {class: "slot-label"}, el("span", {class: "dot " + s.kind}), s.label);
+      row = el("div", {class: "row"}, label, input, saved);
+      row.input = input; row.saved = saved;
+      let t;
+      const save = async () => {
+        clearTimeout(t);
+        if (input.value === row.serverName) return;
+        try {
+          const r = await api("/api/name", {label: s.label, name: input.value});
+          row.serverName = r.name;
+          saved.classList.add("on"); setTimeout(() => saved.classList.remove("on"), 1200);
+        } catch (e) { alert(e.message); }
+      };
+      input.addEventListener("input", () => { clearTimeout(t); t = setTimeout(save, 700); });
+      input.addEventListener("blur", save);
+      input.addEventListener("keydown", e => { if (e.key === "Enter") input.blur(); });
+      slotRows[s.label] = row;
+    }
+    if (document.activeElement !== row.input && row.input.value !== s.name) row.input.value = s.name;
+    row.serverName = s.name;
+    row.classList.toggle("flash", s.flash);
+    if (box.children[i] !== row) box.insertBefore(row, box.children[i] || null);
+  });
+  if (!slots.length) box.textContent = "No buzzers connected.";
+}
+
+function renderQuizzes(packs) {
+  const box = $("#quizzes");
+  box.replaceChildren();
+  if (!packs.length) { box.append(el("div", {class: "empty", text: "No quizzes yet. Make one!"})); return; }
+  for (const p of packs) {
+    const btn = el("button", {class: "quiz"},
+      el("div", {class: "t"}, el("span", {class: "n", text: p.name}),
+         el("span", {class: "c", text: `${p.count} question${p.count === 1 ? "" : "s"}`})),
+      ...(p.description ? [el("div", {class: "d", text: p.description})] : []));
+    if (p.kids) btn.querySelector(".t").append(el("span", {class: "badge", text: "KIDS"}));
+    btn.onclick = () => openQuiz(p.file);
+    box.append(btn);
+  }
+}
+
+async function refresh() {
+  try {
+    const st = await api("/api/state");
+    renderSlots(st.slots);
+    if (!$("#view-quizzes").hidden) renderQuizzes(st.packs);
+  } catch (e) {}
+}
+setInterval(() => { if (!$("#view-players").hidden) refresh(); }, 700);
+
+// ---------------------------------------------------------------- editor
+function questionCard(q = {cat: "", q: "", answers: ["", "", "", ""]}) {
+  const card = $("#q-tpl").content.firstElementChild.cloneNode(true);
+  card.querySelector(".cat").value = q.cat || "";
+  card.querySelector(".qt").value = q.q || "";
+  ["Right", "Wrong", "Wrong", "Wrong"].forEach((tag, i) => {
+    const inp = el("input", {type: "text", class: "a", maxlength: "80",
+      placeholder: i === 0 ? "Right answer" : "Wrong answer"});
+    inp.value = (q.answers || [])[i] || "";
+    const bz = el("span", {class: "bz"}); bz.style.background = COLOURS[i];
+    card.append(el("div", {class: "ans" + (i === 0 ? " right" : "")}, bz, el("span", {class: "tag", text: tag.toUpperCase()}), inp));
+  });
+  card.querySelector(".del").onclick = () => {
+    const filled = card.querySelector(".qt").value.trim();
+    if (!filled || confirm("Delete this question?")) { card.remove(); renumber(); dirty = true; }
+  };
+  card.addEventListener("input", () => { dirty = true; card.classList.remove("invalid"); });
+  return card;
+}
+
+function renumber() {
+  const cards = [...$("#questions").children];
+  cards.forEach((c, i) => c.querySelector(".q-num").textContent = i + 1);
+  $("#q-count").textContent = `Questions (${cards.length})`;
+}
+
+function loadEditor(pack) {
+  editing = pack;
+  $("#e-name").value = pack.name || "";
+  $("#e-desc").value = pack.description || "";
+  $("#e-kids").checked = !!pack.kids;
+  $("#questions").replaceChildren(...(pack.questions || []).map(q => questionCard(q)));
+  if (!pack.questions || !pack.questions.length) $("#questions").append(questionCard());
+  $("#delete-quiz").hidden = !pack.file;
+  renumber();
+  setMsg("The first answer is always the right one - the game shuffles them.");
+  dirty = false;
+  show("editor");
+}
+
+async function openQuiz(file) {
+  try { loadEditor(await api("/api/pack?file=" + encodeURIComponent(file))); }
+  catch (e) { alert(e.message); }
+}
+
+$("#new-quiz").onclick = () => loadEditor({file: null, name: "", description: "", kids: false, questions: []});
+$("#add-q").onclick = () => {
+  const c = questionCard(); $("#questions").append(c); renumber(); dirty = true;
+  c.querySelector(".qt").focus(); c.scrollIntoView({behavior: "smooth", block: "center"});
+};
+for (const id of ["#e-name", "#e-desc", "#e-kids"]) $(id).addEventListener("input", () => dirty = true);
+
+$("#bulk-add").onclick = () => {
+  const lines = $("#bulk").value.split("\n").map(l => l.trim()).filter(Boolean);
+  const bad = [];
+  let added = 0;
+  // drop a blank starter card
+  const cards = [...$("#questions").children];
+  if (cards.length === 1 && !cards[0].querySelector(".qt").value.trim()) cards[0].remove();
+  lines.forEach((line, n) => {
+    const parts = line.split("|").map(p => p.trim());
+    let q;
+    if (parts.length === 5) q = {q: parts[0], answers: parts.slice(1)};
+    else if (parts.length === 6) q = {cat: parts[0], q: parts[1], answers: parts.slice(2)};
+    if (!q || q.answers.some(a => !a) || !q.q) { bad.push(n + 1); return; }
+    $("#questions").append(questionCard(q)); added++;
+  });
+  renumber();
+  if (added) { dirty = true; $("#bulk").value = bad.length ? lines.filter((_, i) => bad.includes(i + 1)).join("\n") : ""; }
+  setMsg(`Added ${added} question${added === 1 ? "" : "s"}.` + (bad.length ? ` Lines ${bad.join(", ")} need 5 or 6 parts - left in the box.` : " Don't forget to save!"), bad.length ? "err" : "ok");
+};
+
+function collect() {
+  return {
+    file: editing.file,
+    name: $("#e-name").value,
+    description: $("#e-desc").value,
+    kids: $("#e-kids").checked,
+    questions: [...$("#questions").children].map(c => ({
+      cat: c.querySelector(".cat").value,
+      q: c.querySelector(".qt").value,
+      answers: [...c.querySelectorAll(".a")].map(a => a.value),
+    })),
+  };
+}
+
+function setMsg(text, kind = "") { const m = $("#msg"); m.textContent = text; m.className = "msg " + kind; }
+
+$("#save").onclick = async () => {
+  const data = collect();
+  // ignore completely empty cards
+  const cards = [...$("#questions").children];
+  data.questions = data.questions.filter((q, i) => {
+    const empty = !q.q.trim() && q.answers.every(a => !a.trim());
+    if (empty) cards[i].dataset.skip = "1";
+    return !empty;
+  });
+  cards.forEach(c => c.classList.remove("invalid"));
+  if (!data.questions.length) { setMsg("Add at least one question before saving.", "err"); return; }
+  $("#save").disabled = true;
+  try {
+    const r = await api("/api/pack", data);
+    editing.file = r.file;
+    $("#delete-quiz").hidden = false;
+    dirty = false;
+    setMsg(`Saved - ${r.count} questions. It's in the game now!`, "ok");
+  } catch (e) {
+    setMsg(e.message, "err");
+    const m = /question (\d+)/i.exec(e.message);
+    if (m) {
+      const kept = cards.filter(c => !c.dataset.skip);
+      const card = kept[+m[1] - 1];
+      if (card) { card.classList.add("invalid"); card.scrollIntoView({behavior: "smooth", block: "center"}); }
+    }
+  } finally {
+    cards.forEach(c => delete c.dataset.skip);
+    $("#save").disabled = false;
+  }
+};
+
+$("#delete-quiz").onclick = async () => {
+  if (!editing.file || !confirm(`Delete "${$("#e-name").value || "this quiz"}" for good?`)) return;
+  try { await api("/api/pack/delete", {file: editing.file}); dirty = false; show("quizzes"); refresh(); }
+  catch (e) { alert(e.message); }
+};
+
+refresh();
+</script>
+</body>
+</html>
