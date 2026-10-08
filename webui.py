@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Adam (a-adz-1) - Buzzer Party, https://github.com/a-adz-1/buzzer-party
 """Admin web UI for Buzzer Party: name players and build quizzes from a phone.
 
 Runs only while the game is in Admin mode. Every API call is handed to the

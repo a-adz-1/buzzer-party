@@ -74,3 +74,12 @@ If pressing one colour registers as another, watch the *last press* line at the 
 
 - **"No Buzz buzzers detected".** Run `lsusb | grep -i 054c`. If your set shows a different ID, add it to the udev rule. The game also treats any 20-button, no-axis controller as a Buzz set.
 - **"LEDs off".** The udev rule isn't installed. Rerun `install.sh`, or copy the rules file to `/etc/udev/rules.d/` yourself, then replug the buzzers.
+
+## Licence
+
+Buzzer Party is free software: you can redistribute it and/or modify it under the terms of the
+[GNU General Public License v3](LICENSE), or (at your option) any later version. That covers everything
+in this repo: the code, the web UI, the question packs and the screenshots.
+
+It is a fan-made project and is not affiliated with or endorsed by Sony Interactive Entertainment.
+"Buzz!" and "PlayStation" are trademarks of their respective owners.

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Adam (a-adz-1) - Buzzer Party, https://github.com/a-adz-1/buzzer-party
 """Buzzer Party - a party quiz for PlayStation Buzz! buzzers on SteamOS / Linux.
 
 Inputs: real Buzz buzzers (wired or wireless dongle, up to 2 sets = 8 players),

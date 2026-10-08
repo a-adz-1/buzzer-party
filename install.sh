@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Adam (a-adz-1) - Buzzer Party, https://github.com/a-adz-1/buzzer-party
 # Buzzer Party installer for SteamOS / Linux. Run from Desktop Mode in Konsole:
 #   bash install.sh
 set -euo pipefail
